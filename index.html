@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Demo - Login</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input, button { margin: 5px; padding: 8px; display: block; width: 300px; }
+        h2 { margin-top: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Inicio de Sesión / Registro</h1>
+    <input type="email" id="email" placeholder="Correo Electrónico">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="signUp()">Registrarse</button>
+    <button onclick="signIn()">Iniciar Sesión</button>
+    
+    <h2>¿Olvidaste tu Contraseña?</h2>
+    <input type="email" id="forgotEmail" placeholder="Correo para restablecer">
+    <button onclick="forgotPassword()">Restablecer Contraseña</button>
+    
+    <p id="message"></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ¡REEMPLAZA CON TUS CREDENCIALES REALES!
+        const SUPABASE_URL = 'TU_URL_PROYECTO';
+        const SUPABASE_ANON_KEY = 'TU_KEY_ANON';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const messageEl = document.getElementById('message');
+
+        // Redirigir si ya está autenticado
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        async function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) {
+                messageEl.className = 'error';
+                messageEl.innerText = 'Error al registrarse: ' + error.message;
+            } else {
+                messageEl.className = 'success';
+                messageEl.innerText = '¡Registro exitoso! Revisa tu correo para verificar la cuenta.';
+            }
+        }
+
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                messageEl.className = 'error';
+                messageEl.innerText = 'Error al iniciar sesión: ' + error.message;
+            } else {
+                window.location.href = 'dashboard.html'; // Redirigir al dashboard
+            }
+        }
+
+        async function forgotPassword() {
+            const email = document.getElementById('forgotEmail').value;
+            // IMPORTANTE: DEBES USAR EL URL PÚBLICO DE TU GITHUB PAGES AQUÍ
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://joaco2382.github.io/supabase-auth-pages/reset_password.html' 
+            });
+            if (error) {
+                messageEl.className = 'error';
+                messageEl.innerText = 'Error: ' + error.message;
+            } else {
+                messageEl.className = 'success';
+                messageEl.innerText = 'Correo de restablecimiento enviado. Revisa tu bandeja de entrada.';
+            }
+        }
+    </script>
+</body>
+</html>
