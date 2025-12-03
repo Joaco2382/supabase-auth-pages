@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Privado</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Bienvenido a tu Dashboard</h1>
+    <p id="userEmail">Cargando datos...</p>
+    <button onclick="signOut()">Cerrar Sesión</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ¡REEMPLAZA CON TUS CREDENCIALES REALES!
+        const SUPABASE_URL = 'TU_URL_PROYECTO';
+        const SUPABASE_ANON_KEY = 'TU_KEY_ANON';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Verificar si el usuario está autenticado
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+                window.location.href = 'index.html'; // No autenticado, redirigir al login
+            } else {
+                document.getElementById('userEmail').innerText = 'Sesión activa para: ' + session.user.email;
+            }
+        });
+
+        async function signOut() {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.href = 'index.html'; // Cerrar sesión y redirigir
+            }
+        }
+    </script>
+</body>
+</html>
